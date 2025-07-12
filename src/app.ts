@@ -2,14 +2,21 @@ import express, { Application, NextFunction, Request, Response } from 'express';
 import { booksRoutes } from './app/controllers/books.controller';
 import { borrowsRoutes } from './app/controllers/borrows.controller';
 const app: Application = express()
+import cors from 'cors'
 
 app.use(express.json())
+app.use(
+    cors({
+        origin: 'http://localhost:5173',
+        credentials: true,
+    })
+)
 
 app.use("/api/books", booksRoutes)
 app.use("/api/borrow", borrowsRoutes)
 
 app.get('/', (req: Request, res: Response) => {
-    res.send('Smart Lib server')
+    res.send('Book Verse server')
 })
 
 app.use((req: Request, res: Response, next: NextFunction) => {

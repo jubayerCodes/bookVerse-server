@@ -1,12 +1,12 @@
-# 📚 Smart Library Management API
+# 📚 Book Verse - Smart Library Management
 
 A Library Management REST API built with **Express.js**, **TypeScript**, and **MongoDB (Mongoose)**. This system allows users to manage books and borrowing records, enforcing business rules like inventory control and availability checks.
 ---
 
 ## 💻 Local Setup
 
-    git clone https://github.com/jubayerCodes/smartLib-server.git
-    cd smartLib-server
+    git clone https://github.com/jubayerCodes/bookVerse-server.git
+    cd bookVerse-server
     npm install
     npm run dev
 ---
