@@ -35,7 +35,10 @@ booksRoutes.post('/', async (req: Request, res: Response, next: NextFunction) =>
 booksRoutes.get('/', async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-        const { filter, sortBy, sort, limit = 10 } = req.query
+        const { filter, sortBy, sort, limit, page } = req.query
+
+        const limitNum = parseInt(limit as string) || 10;
+        const pageNum = parseInt(page as string) || 1;
 
         const sortOrder = sort === "asc" ? 1 : sort === "desc" ? -1 : undefined;
 
@@ -54,16 +57,30 @@ booksRoutes.get('/', async (req: Request, res: Response, next: NextFunction) => 
             allBooksCursor = allBooksCursor.sort(sortOption);
         }
 
-        if (limit && !isNaN(Number(limit))) {
-            allBooksCursor = allBooksCursor.limit(Number(limit));
+        if (!isNaN(pageNum)) {
+
+            const skip = (pageNum - 1) * limitNum
+            allBooksCursor = allBooksCursor.skip(skip)
+        }
+
+        if (!isNaN(limitNum)) {
+            allBooksCursor = allBooksCursor.limit(limitNum);
         }
 
         const allBooks = await allBooksCursor.exec()
 
+        const total = await Book.countDocuments(query);
+
         res.json({
             success: true,
             message: "Books retrieved successfully",
-            data: allBooks
+            data: allBooks,
+            meta: {
+                total,
+                page: pageNum,
+                pages: Math.ceil(total / limitNum),
+                limit: limitNum
+            }
         })
     } catch (error: any) {
         if (!error.message) {

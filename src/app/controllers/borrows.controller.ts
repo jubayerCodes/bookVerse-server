@@ -35,6 +35,11 @@ borrowsRoutes.post("/", async (req: Request, res: Response, next: NextFunction) 
 
 borrowsRoutes.get("/", async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const limit = parseInt(req.query.limit as string) || 5;
+        const page = parseInt(req.query.page as string) || 1;
+        const skip = (page - 1) * limit;
+
+        // Full aggregation pipeline with pagination
         const aggregationPipeline: any[] = [
             {
                 $group: {
@@ -54,6 +59,11 @@ borrowsRoutes.get("/", async (req: Request, res: Response, next: NextFunction) =
                 $unwind: "$bookDetails"
             },
             {
+                $sort: {
+                    "bookDetails.title": 1
+                }
+            },
+            {
                 $project: {
                     _id: 0,
                     book: {
@@ -63,15 +73,30 @@ borrowsRoutes.get("/", async (req: Request, res: Response, next: NextFunction) =
                     totalQuantity: 1
                 }
             }
-        ]
+        ];
 
-        const bookSummary = await Borrow.aggregate(aggregationPipeline)
+        // Clone pipeline for counting (without pagination)
+        const countPipeline = [...aggregationPipeline, { $count: "total" }];
+        const countResult = await Borrow.aggregate(countPipeline);
+        const total = countResult[0]?.total || 0;
+        const pages = Math.ceil(total / limit);
+
+        // Add pagination to main pipeline
+        aggregationPipeline.push({ $skip: skip }, { $limit: limit });
+
+        const bookSummary = await Borrow.aggregate(aggregationPipeline);
 
         res.json({
             success: true,
             message: "Borrowed books summary retrieved successfully",
+            meta: {
+                total,
+                limit,
+                page,
+                pages
+            },
             data: bookSummary
-        })
+        });
     } catch (error: any) {
         if (!error.message) {
             error.message = "Borrowed books summary retrieve failed"
