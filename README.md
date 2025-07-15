@@ -15,15 +15,14 @@ A Library Management REST API built with **Express.js**, **TypeScript**, and **M
 
 **Create a .env file with:**
 
-    DB_USER=smartLib
-    DB_PASS=pQ9NsglZkoAJiIKd
+    DB_USER=bookVerse
+    DB_PASS=UO0WZ9MvraxZmrkZ
 ---
 
 ## 🔗 Live API & Demo
 
-- 🚀 Live API: [https://smartlib-server.onrender.com](https://smartlib-server.onrender.com)
-- 🎥 Video Explanation: [Drive Link](https://drive.google.com/file/d/1Jno0EdOfrrpIiS0AUjNfKFRfAIvu7sZF/view?usp=drive_link)
-- 📁 GitHub Repo: [GitHub Repository](https://github.com/jubayerCodes/smartLib-server)
+- 🚀 Live API: [https://book-verse-server-alpha.vercel.app](https://book-verse-server-alpha.vercel.app)
+- 📁 GitHub Repo: [GitHub Repository](https://github.com/jubayerCodes/bookVerse-server)
 
 ---
 
@@ -57,4 +56,4 @@ A Library Management REST API built with **Express.js**, **TypeScript**, and **M
 - **Language**: TypeScript
 - **Database**: MongoDB with Mongoose
 - **Validation**: Zod + Mongoose Schema
-- **Deployment**: Render
+- **Deployment**: Vercel
