@@ -42,7 +42,9 @@ exports.booksRoutes.post('/', (req, res, next) => __awaiter(void 0, void 0, void
 // Get all books API
 exports.booksRoutes.get('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { filter, sortBy, sort, limit = 10 } = req.query;
+        const { filter, sortBy, sort, limit, page } = req.query;
+        const limitNum = parseInt(limit) || 10;
+        const pageNum = parseInt(page) || 1;
         const sortOrder = sort === "asc" ? 1 : sort === "desc" ? -1 : undefined;
         const query = {};
         if (filter) {
@@ -54,14 +56,25 @@ exports.booksRoutes.get('/', (req, res, next) => __awaiter(void 0, void 0, void 
             sortOption = { [sortBy]: sortOrder };
             allBooksCursor = allBooksCursor.sort(sortOption);
         }
-        if (limit && !isNaN(Number(limit))) {
-            allBooksCursor = allBooksCursor.limit(Number(limit));
+        if (!isNaN(pageNum)) {
+            const skip = (pageNum - 1) * limitNum;
+            allBooksCursor = allBooksCursor.skip(skip);
+        }
+        if (!isNaN(limitNum)) {
+            allBooksCursor = allBooksCursor.limit(limitNum);
         }
         const allBooks = yield allBooksCursor.exec();
+        const total = yield book_model_1.Book.countDocuments(query);
         res.json({
             success: true,
             message: "Books retrieved successfully",
-            data: allBooks
+            data: allBooks,
+            meta: {
+                total,
+                page: pageNum,
+                pages: Math.ceil(total / limitNum),
+                limit: limitNum
+            }
         });
     }
     catch (error) {

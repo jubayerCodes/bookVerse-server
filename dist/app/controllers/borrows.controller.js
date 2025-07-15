@@ -41,7 +41,12 @@ exports.borrowsRoutes.post("/", (req, res, next) => __awaiter(void 0, void 0, vo
     }
 }));
 exports.borrowsRoutes.get("/", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
+        const limit = parseInt(req.query.limit) || 5;
+        const page = parseInt(req.query.page) || 1;
+        const skip = (page - 1) * limit;
+        // Full aggregation pipeline with pagination
         const aggregationPipeline = [
             {
                 $group: {
@@ -61,6 +66,11 @@ exports.borrowsRoutes.get("/", (req, res, next) => __awaiter(void 0, void 0, voi
                 $unwind: "$bookDetails"
             },
             {
+                $sort: {
+                    "bookDetails.title": 1
+                }
+            },
+            {
                 $project: {
                     _id: 0,
                     book: {
@@ -71,10 +81,23 @@ exports.borrowsRoutes.get("/", (req, res, next) => __awaiter(void 0, void 0, voi
                 }
             }
         ];
+        // Clone pipeline for counting (without pagination)
+        const countPipeline = [...aggregationPipeline, { $count: "total" }];
+        const countResult = yield borrow_model_1.Borrow.aggregate(countPipeline);
+        const total = ((_a = countResult[0]) === null || _a === void 0 ? void 0 : _a.total) || 0;
+        const pages = Math.ceil(total / limit);
+        // Add pagination to main pipeline
+        aggregationPipeline.push({ $skip: skip }, { $limit: limit });
         const bookSummary = yield borrow_model_1.Borrow.aggregate(aggregationPipeline);
         res.json({
             success: true,
             message: "Borrowed books summary retrieved successfully",
+            meta: {
+                total,
+                limit,
+                page,
+                pages
+            },
             data: bookSummary
         });
     }

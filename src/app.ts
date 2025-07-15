@@ -7,7 +7,7 @@ import cors from 'cors'
 app.use(express.json())
 app.use(
     cors({
-        origin: 'http://localhost:5173',
+        origin: ['http://localhost:5173', 'https://book-verse-client-omega.vercel.app'],
         credentials: true,
     })
 )
